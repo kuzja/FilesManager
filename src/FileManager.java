@@ -26,7 +26,7 @@ public class FileManager {
 
         System.out.println("Specify copy from:");
         fm.setPathFrom(fm.getUserDataString());
-        fm.checkPath(fm.getPathFrom());
+        fm.checkSourcePath(fm.getPathFrom());
 
         System.out.println("Specify copy to:");
         fm.setPathTo(fm.getUserDataString());
@@ -45,35 +45,76 @@ public class FileManager {
         ArrayList<String> dirs = new ArrayList<>();
         ArrayList<String> files = new ArrayList<>();
 
-        boolean isDirectory = fm.checkPath(fm.getPathFrom());
+        ArrayList<String[]> filesInfo = new ArrayList<>();
 
-        fm.copyFilesLength = fm.scanDirs(fm.getPathFrom(), dirs, files);
+        fm.checkSourcePath(fm.getPathFrom());
 
         Operation op = fm.getOperationType();
 
-        if (isDirectory) {
+        //      fm.copyFilesLength = fm.scanDirs(fm.getPathFrom(), dirs, files);
 
-            for (String dir : dirs) {
-                File directory = new File(dir.replace(fm.getPathFrom(), fm.getPathTo()));
+        fm.scanDirs(fm.getPathFrom(), filesInfo);
+
+        String sourceDir = "";
+
+        if (op == Operation.DirToDest) {
+            sourceDir = new File(fm.getPathFrom()).getName();
+        }
+
+        for (String[] file : filesInfo) {
+
+            if (file[2].equals("1")) {
+                File directory = new File(fm.getPathTo() + "\\" + sourceDir + "\\" + file[0].replace(fm.getPathFrom(), ""));
                 if (!directory.exists()) {
                     directory.mkdirs();
                 }
             }
         }
 
+//        for (String dir : dirs) {
+////                File directory = new File(dir.replace(fm.getPathFrom(), fm.getPathTo()));
+////                if (!directory.exists()) {
+////                    directory.mkdirs();
+////                }
+////            }
+//            if (op == Operation.DirToDest) {
+//                File directory = new File(fm.getPathTo() + "\\" + sourceDir + "\\" + dir.replace(fm.getPathFrom(), ""));
+//                if (!directory.exists()) {
+//                    directory.mkdirs();
+//                }
+//            }
+//        }
+
+
         Thread countDown = new Thread(fm.new CountDown());
+
         countDown.start();
 
         boolean success = true;
 
-        for (String file : files) {
+        for (String[] file : filesInfo) {
 
-            String dest = file.replace(fm.getPathFrom(), fm.getPathTo());
-            String source = file;
+            if(file[2].equals("1")){
+                continue;
+            }
+//
+//            String dest = file.replace(fm.getPathFrom(), fm.getPathTo());
+//            String source = file;
+//
+//            if (!isDirectory) {
+//                dest = fm.getPathTo() + dest;
+//                source = fm.getPathFrom();
+//            }
 
-            if (!isDirectory) {
-                dest = fm.getPathTo() + dest;
+            String source = "";
+            String dest = "";
+
+            if (op == Operation.FileToFile) {
                 source = fm.getPathFrom();
+                dest = fm.getPathTo();
+            } else if (op == Operation.DirToDest) {
+                dest = fm.getPathTo() + "\\" + sourceDir + "\\ " + new File(fm.getPathFrom()).getName() + "\\" + file[1];
+                source = file[0];
             }
 
             try (RandomAccessFile in = new RandomAccessFile(source, "r");
@@ -146,7 +187,7 @@ public class FileManager {
         this.pathTo = pathTo;
     }
 
-    private boolean checkPath(String path) {
+    private void checkSourcePath(String path) {
 
         while (true) {
 
@@ -166,7 +207,7 @@ public class FileManager {
                 }
             }
             setPathFrom(path);
-            return file.isDirectory();
+            break;
         }
     }
 
@@ -174,37 +215,36 @@ public class FileManager {
         return in.nextLine();
     }
 
-    private long scanDirs(String path, ArrayList<String> dirs, ArrayList<String> files) {
+    private void scanDirs(String path, ArrayList<String[]> fileInfo) {
+
+        /*
+        0 - source
+        1 - name
+        2 - is directory
+         */
 
         File f = new File(path);
-
         File[] listFiles = f.listFiles();
+        String info[] = new String[4];
 
-        if (f.isDirectory()) {
+        for (File file : listFiles) {
 
-            for (File file : listFiles) {
-
-                if (!file.isDirectory()) {
-                    copyFilesLength = copyFilesLength + file.length();
-                    files.add(file.getAbsolutePath());
-                }
-
-                if (file.isDirectory()) {
-                    dirs.add(file.getAbsolutePath());
-                    copyFilesLength = copyFilesLength + file.length();
-                    scanDirs(file.getPath(), dirs, files);
-                }
+            if (!file.isDirectory()) {
+                info[0] = file.getAbsolutePath();
+                info[1] = file.getName();
+                info[2] = "0";
+                fileInfo.add(info);
+                copyFilesLength = copyFilesLength + file.length();
+            }else{
+                info[0] = file.getAbsolutePath();
+                info[1] = file.getName();
+                info[2] = "1";
+                fileInfo.add(info);
+                copyFilesLength = copyFilesLength + file.length();
+                scanDirs(file.getPath(), fileInfo);
             }
-        } else {
 
-            if (f.getName().charAt(f.getName().length() - 1) == '\\') {
-                files.add(f.getName());
-            } else {
-                files.add("\\" + f.getName());
-            }
-            copyFilesLength = f.length();
         }
-        return copyFilesLength;
     }
 
     class CountDown implements Runnable {

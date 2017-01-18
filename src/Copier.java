@@ -35,7 +35,6 @@ public class Copier implements Runnable {
                 TimeUnit.MILLISECONDS.sleep(5);
             }
 
-            TimeUnit.MILLISECONDS.sleep(1000);
         }
     }
 
