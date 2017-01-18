@@ -26,17 +26,14 @@ public class FileManager {
         FileManager fm = new FileManager();
 
         System.out.println("Specify copy from:");
-        //       fm.setPathFrom(fm.getUserDataString());
-        fm.setPathFrom("D:\\1\\1.txt");
+        fm.setPathFrom(fm.getUserDataString());
         fm.checkSourcePath(fm.getPathFrom());
 
         System.out.println("Specify copy to:");
-        //       fm.setPathTo(fm.getUserDataString());
-        fm.setPathTo("D:\\2\\2.txt");
+        fm.setPathTo(fm.getUserDataString());
 
         System.out.println("Specify threads count (minimum 2):");
-        //      fm.setThreadCount(Integer.parseInt(fm.getUserDataString()));
-        fm.setThreadCount(Integer.parseInt("10"));
+        fm.setThreadCount(Integer.parseInt(fm.getUserDataString()));
 
         if (fm.getThreadCount() < 2) {
             fm.setThreadCount(2);
@@ -44,8 +41,8 @@ public class FileManager {
         }
 
         System.out.println("Specify buffer size (Kb):");
-        //      fm.setBufferSize(Integer.parseInt(fm.getUserDataString()));
-        fm.setBufferSize(Integer.parseInt("1024"));
+        fm.setBufferSize(Integer.parseInt(fm.getUserDataString()));
+
 
         ArrayList<String[]> filesInfo = new ArrayList<>();
 
