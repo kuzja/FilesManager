@@ -23,7 +23,7 @@ public class Copier implements Runnable {
 
             synchronized (in) {
                 byteCount = in.read(buffer);
-                TimeUnit.MILLISECONDS.sleep(5);
+                TimeUnit.MILLISECONDS.sleep(3);
             }
 
             synchronized (out) {
@@ -32,7 +32,7 @@ public class Copier implements Runnable {
                 }
                 writtenBytes = writtenBytes + byteCount;
                 out.write(buffer, 0, byteCount);
-                TimeUnit.MILLISECONDS.sleep(5);
+                TimeUnit.MILLISECONDS.sleep(3);
             }
 
         }

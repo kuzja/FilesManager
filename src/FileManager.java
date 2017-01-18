@@ -27,12 +27,12 @@ public class FileManager {
 
         System.out.println("Specify copy from:");
         //       fm.setPathFrom(fm.getUserDataString());
-        fm.setPathFrom("D:\\ventalab-20160613-124740-copy.rar");
+        fm.setPathFrom("D:\\Torrent\\release_Remix_OS_for_PC_32bit_B2016042001.zip");
         fm.checkSourcePath(fm.getPathFrom());
 
         System.out.println("Specify copy to:");
         //       fm.setPathTo(fm.getUserDataString());
-        fm.setPathTo("D:\\1");
+        fm.setPathTo("D:\\");
 
         System.out.println("Specify threads count (minimum 2):");
         //      fm.setThreadCount(Integer.parseInt(fm.getUserDataString()));
