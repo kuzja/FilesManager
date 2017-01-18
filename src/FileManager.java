@@ -96,7 +96,7 @@ public class FileManager {
             } else if (fm.op == Operation.DirToDest) {
                 dest = fm.getPathTo() + "\\" + sourceDir + file[0].replace(fm.getPathFrom(), "");
                 source = file[0];
-            }else{
+            } else {
                 source = fm.getPathFrom();
                 dest = fm.getPathTo();
             }
