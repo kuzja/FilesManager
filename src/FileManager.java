@@ -15,6 +15,7 @@ public class FileManager {
     private int threadCount;
     private int bufferSize;
     private long copyFilesLength;
+    private Operation op;
 
     public FileManager() {
         this.in = new Scanner(System.in);
@@ -25,14 +26,17 @@ public class FileManager {
         FileManager fm = new FileManager();
 
         System.out.println("Specify copy from:");
-        fm.setPathFrom(fm.getUserDataString());
+        //       fm.setPathFrom(fm.getUserDataString());
+        fm.setPathFrom("D:\\ventalab-20160613-124740-copy.rar");
         fm.checkSourcePath(fm.getPathFrom());
 
         System.out.println("Specify copy to:");
-        fm.setPathTo(fm.getUserDataString());
+        //       fm.setPathTo(fm.getUserDataString());
+        fm.setPathTo("D:\\1");
 
         System.out.println("Specify threads count (minimum 2):");
-        fm.setThreadCount(Integer.parseInt(fm.getUserDataString()));
+        //      fm.setThreadCount(Integer.parseInt(fm.getUserDataString()));
+        fm.setThreadCount(Integer.parseInt("10"));
 
         if (fm.getThreadCount() < 2) {
             fm.setThreadCount(2);
@@ -40,7 +44,8 @@ public class FileManager {
         }
 
         System.out.println("Specify buffer size (Kb):");
-        fm.setBufferSize(Integer.parseInt(fm.getUserDataString()));
+        //      fm.setBufferSize(Integer.parseInt(fm.getUserDataString()));
+        fm.setBufferSize(Integer.parseInt("1024"));
 
         ArrayList<String> dirs = new ArrayList<>();
         ArrayList<String> files = new ArrayList<>();
@@ -49,42 +54,26 @@ public class FileManager {
 
         fm.checkSourcePath(fm.getPathFrom());
 
-        Operation op = fm.getOperationType();
-
-        //      fm.copyFilesLength = fm.scanDirs(fm.getPathFrom(), dirs, files);
+        fm.op = fm.getOperationType();
 
         fm.scanDirs(fm.getPathFrom(), filesInfo);
 
         String sourceDir = "";
 
-        if (op == Operation.DirToDest) {
+        if (fm.op == Operation.DirToDest) {
             sourceDir = new File(fm.getPathFrom()).getName();
         }
 
         for (String[] file : filesInfo) {
 
             if (file[2].equals("1")) {
-                File directory = new File(fm.getPathTo() + "\\" + sourceDir + "\\" + file[0].replace(fm.getPathFrom(), ""));
+                String path = fm.getPathTo() + "\\" + sourceDir + "\\" + file[0].replace(fm.getPathFrom(), "");
+                File directory = new File(path);
                 if (!directory.exists()) {
-                    directory.mkdirs();
+                    directory.mkdir();
                 }
             }
         }
-
-//        for (String dir : dirs) {
-////                File directory = new File(dir.replace(fm.getPathFrom(), fm.getPathTo()));
-////                if (!directory.exists()) {
-////                    directory.mkdirs();
-////                }
-////            }
-//            if (op == Operation.DirToDest) {
-//                File directory = new File(fm.getPathTo() + "\\" + sourceDir + "\\" + dir.replace(fm.getPathFrom(), ""));
-//                if (!directory.exists()) {
-//                    directory.mkdirs();
-//                }
-//            }
-//        }
-
 
         Thread countDown = new Thread(fm.new CountDown());
 
@@ -94,27 +83,22 @@ public class FileManager {
 
         for (String[] file : filesInfo) {
 
-            if(file[2].equals("1")){
+            if (file[2].equals("1")) {
                 continue;
             }
-//
-//            String dest = file.replace(fm.getPathFrom(), fm.getPathTo());
-//            String source = file;
-//
-//            if (!isDirectory) {
-//                dest = fm.getPathTo() + dest;
-//                source = fm.getPathFrom();
-//            }
 
             String source = "";
             String dest = "";
 
-            if (op == Operation.FileToFile) {
+            if (fm.op == Operation.FileToDir) {
+                source = fm.getPathFrom();
+                dest = fm.getPathTo() + "\\" + file[1];
+            } else if (fm.op == Operation.DirToDest) {
+                dest = fm.getPathTo() + "\\" + sourceDir + file[0].replace(fm.getPathFrom(), "");
+                source = file[0];
+            }else{
                 source = fm.getPathFrom();
                 dest = fm.getPathTo();
-            } else if (op == Operation.DirToDest) {
-                dest = fm.getPathTo() + "\\" + sourceDir + "\\ " + new File(fm.getPathFrom()).getName() + "\\" + file[1];
-                source = file[0];
             }
 
             try (RandomAccessFile in = new RandomAccessFile(source, "r");
@@ -215,31 +199,40 @@ public class FileManager {
         return in.nextLine();
     }
 
+    /*
+        0 - source;
+        1 - name;
+        2 - is directory;
+    */
     private void scanDirs(String path, ArrayList<String[]> fileInfo) {
-
-        /*
-        0 - source
-        1 - name
-        2 - is directory
-         */
 
         File f = new File(path);
         File[] listFiles = f.listFiles();
-        String info[] = new String[4];
+
+        if (op == Operation.FileToDir | op == Operation.FileToFile) {
+            String info[] = new String[4];
+            info[0] = f.getAbsolutePath();
+            info[1] = f.getName();
+            info[2] = "0";
+            fileInfo.add(info);
+            copyFilesLength = f.length();
+            return;
+        }
 
         for (File file : listFiles) {
+
+            String info[] = new String[4];
+            fileInfo.add(info);
 
             if (!file.isDirectory()) {
                 info[0] = file.getAbsolutePath();
                 info[1] = file.getName();
                 info[2] = "0";
-                fileInfo.add(info);
                 copyFilesLength = copyFilesLength + file.length();
-            }else{
+            } else {
                 info[0] = file.getAbsolutePath();
                 info[1] = file.getName();
                 info[2] = "1";
-                fileInfo.add(info);
                 copyFilesLength = copyFilesLength + file.length();
                 scanDirs(file.getPath(), fileInfo);
             }
