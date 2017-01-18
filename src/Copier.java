@@ -15,34 +15,41 @@ public class Copier implements Runnable {
         this.bufferSize = bufferSize;
     }
 
-    private void copy() throws IOException, InterruptedException {
+    private void read() throws IOException, InterruptedException {
         byte[] buffer = new byte[bufferSize];
-        int byteCount = -1;
+        int byteCount = 0;
 
-        while (true) {
+        while (byteCount > -1) {
 
             synchronized (in) {
                 byteCount = in.read(buffer);
-                TimeUnit.MILLISECONDS.sleep(3);
+                TimeUnit.MILLISECONDS.sleep(1);
+                write(buffer, byteCount);
             }
 
-            synchronized (out) {
-                if (byteCount == -1) {
-                    break;
-                }
-                writtenBytes = writtenBytes + byteCount;
-                out.write(buffer, 0, byteCount);
-                TimeUnit.MILLISECONDS.sleep(3);
-            }
+            TimeUnit.MILLISECONDS.sleep(1);
 
         }
+    }
+
+    private void write(byte[] buffer, int byteCount) throws IOException, InterruptedException {
+
+        synchronized (out) {
+            if (byteCount > -1) {
+                out.write(buffer, 0, byteCount);
+                writtenBytes = writtenBytes + byteCount;
+                TimeUnit.MILLISECONDS.sleep(1);
+            }
+        }
+        TimeUnit.MILLISECONDS.sleep(1);
+
     }
 
 
     @Override
     public void run() {
         try {
-            copy();
+            read();
         } catch (IOException | InterruptedException e) {
             System.out.println(e.getMessage());
         }

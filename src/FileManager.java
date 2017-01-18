@@ -27,12 +27,12 @@ public class FileManager {
 
         System.out.println("Specify copy from:");
         //       fm.setPathFrom(fm.getUserDataString());
-        fm.setPathFrom("D:\\Torrent\\release_Remix_OS_for_PC_32bit_B2016042001.zip");
+        fm.setPathFrom("D:\\1\\1.txt");
         fm.checkSourcePath(fm.getPathFrom());
 
         System.out.println("Specify copy to:");
         //       fm.setPathTo(fm.getUserDataString());
-        fm.setPathTo("D:\\");
+        fm.setPathTo("D:\\2\\2.txt");
 
         System.out.println("Specify threads count (minimum 2):");
         //      fm.setThreadCount(Integer.parseInt(fm.getUserDataString()));
@@ -47,9 +47,6 @@ public class FileManager {
         //      fm.setBufferSize(Integer.parseInt(fm.getUserDataString()));
         fm.setBufferSize(Integer.parseInt("1024"));
 
-        ArrayList<String> dirs = new ArrayList<>();
-        ArrayList<String> files = new ArrayList<>();
-
         ArrayList<String[]> filesInfo = new ArrayList<>();
 
         fm.checkSourcePath(fm.getPathFrom());
@@ -62,6 +59,11 @@ public class FileManager {
 
         if (fm.op == Operation.DirToDest) {
             sourceDir = new File(fm.getPathFrom()).getName();
+
+            File directory = new File(fm.getPathTo() + "\\" + sourceDir);
+            if (!directory.exists()) {
+                directory.mkdir();
+            }
         }
 
         for (String[] file : filesInfo) {
@@ -219,24 +221,26 @@ public class FileManager {
             return;
         }
 
-        for (File file : listFiles) {
+        if (listFiles != null) {
+            for (File file : listFiles) {
 
-            String info[] = new String[4];
-            fileInfo.add(info);
+                String info[] = new String[4];
+                fileInfo.add(info);
 
-            if (!file.isDirectory()) {
-                info[0] = file.getAbsolutePath();
-                info[1] = file.getName();
-                info[2] = "0";
-                copyFilesLength = copyFilesLength + file.length();
-            } else {
-                info[0] = file.getAbsolutePath();
-                info[1] = file.getName();
-                info[2] = "1";
-                copyFilesLength = copyFilesLength + file.length();
-                scanDirs(file.getPath(), fileInfo);
+                if (!file.isDirectory()) {
+                    info[0] = file.getAbsolutePath();
+                    info[1] = file.getName();
+                    info[2] = "0";
+                    copyFilesLength = copyFilesLength + file.length();
+                } else {
+                    info[0] = file.getAbsolutePath();
+                    info[1] = file.getName();
+                    info[2] = "1";
+                    copyFilesLength = copyFilesLength + file.length();
+                    scanDirs(file.getPath(), fileInfo);
+                }
+
             }
-
         }
     }
 
