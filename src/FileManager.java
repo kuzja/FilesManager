@@ -74,6 +74,9 @@ public class FileManager {
 
         Thread countDown = new Thread(fm.new CountDown());
 
+
+        fm.copyFilesLength = getFilesLength(fm.fileList);
+
         countDown.start();
 
         boolean success = true;
@@ -124,6 +127,15 @@ public class FileManager {
             System.out.println("File(s) has been successfully copied.");
         }
 
+    }
+
+    private static long getFilesLength(ArrayList<File> fileList) {
+        long fileLength = 0;
+
+        for (File file: fileList) {
+            fileLength = fileLength + file.length();
+        }
+        return fileLength;
     }
 
     private Operation getOperationType() {
@@ -211,7 +223,6 @@ public class FileManager {
                 fileList.add(file);
                 if (!file.isDirectory()) {
                     fileList.add(file);
-                    copyFilesLength = copyFilesLength + file.length();
                 } else {
                     fileList.add(file);
                     scanDirs(file.getPath());
