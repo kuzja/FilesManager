@@ -16,6 +16,7 @@ public class FileManager {
     private int bufferSize;
     private long copyFilesLength;
     private Operation op;
+    private ArrayList<File> fileList = new ArrayList<>();
 
     public FileManager() {
         this.in = new Scanner(System.in);
@@ -43,14 +44,11 @@ public class FileManager {
         System.out.println("Specify buffer size (Kb):");
         fm.setBufferSize(Integer.parseInt(fm.getUserDataString()));
 
-
-        ArrayList<String[]> filesInfo = new ArrayList<>();
-
         fm.checkSourcePath(fm.getPathFrom());
 
         fm.op = fm.getOperationType();
 
-        fm.scanDirs(fm.getPathFrom(), filesInfo);
+        fm.scanDirs(fm.getPathFrom());
 
         String sourceDir = "";
 
@@ -63,10 +61,10 @@ public class FileManager {
             }
         }
 
-        for (String[] file : filesInfo) {
+        for (File file : fm.fileList) {
 
-            if (file[2].equals("1")) {
-                String path = fm.getPathTo() + "\\" + sourceDir + "\\" + file[0].replace(fm.getPathFrom(), "");
+            if (file.isDirectory()) {
+                String path = fm.getPathTo() + "\\" + sourceDir + "\\" + file.getAbsolutePath().replace(fm.getPathFrom(), "");
                 File directory = new File(path);
                 if (!directory.exists()) {
                     directory.mkdir();
@@ -80,9 +78,9 @@ public class FileManager {
 
         boolean success = true;
 
-        for (String[] file : filesInfo) {
+        for (File file : fm.fileList) {
 
-            if (file[2].equals("1")) {
+            if (file.isDirectory()) {
                 continue;
             }
 
@@ -91,10 +89,10 @@ public class FileManager {
 
             if (fm.op == Operation.FileToDir) {
                 source = fm.getPathFrom();
-                dest = fm.getPathTo() + "\\" + file[1];
+                dest = fm.getPathTo() + "\\" + file.getName();
             } else if (fm.op == Operation.DirToDest) {
-                dest = fm.getPathTo() + "\\" + sourceDir + file[0].replace(fm.getPathFrom(), "");
-                source = file[0];
+                dest = fm.getPathTo() + "\\" + sourceDir + file.getAbsolutePath().replace(fm.getPathFrom(), "");
+                source = file.getAbsolutePath();
             } else {
                 source = fm.getPathFrom();
                 dest = fm.getPathTo();
@@ -142,7 +140,7 @@ public class FileManager {
         return threadCount;
     }
 
-    public void setThreadCount(int threadCount) {
+    private void setThreadCount(int threadCount) {
         this.threadCount = threadCount;
     }
 
@@ -150,7 +148,7 @@ public class FileManager {
         return bufferSize;
     }
 
-    public void setBufferSize(int bufferSize) {
+    private void setBufferSize(int bufferSize) {
         this.bufferSize = bufferSize * 1024;
     }
 
@@ -158,7 +156,7 @@ public class FileManager {
         return pathFrom;
     }
 
-    public void setPathFrom(String pathFrom) {
+    private void setPathFrom(String pathFrom) {
         this.pathFrom = pathFrom;
     }
 
@@ -166,7 +164,7 @@ public class FileManager {
         return pathTo;
     }
 
-    public void setPathTo(String pathTo) {
+    private void setPathTo(String pathTo) {
         this.pathTo = pathTo;
     }
 
@@ -198,43 +196,25 @@ public class FileManager {
         return in.nextLine();
     }
 
-    /*
-        0 - source;
-        1 - name;
-        2 - is directory;
-    */
-    private void scanDirs(String path, ArrayList<String[]> fileInfo) {
+    private void scanDirs(String path) {
 
         File f = new File(path);
         File[] listFiles = f.listFiles();
 
         if (op == Operation.FileToDir | op == Operation.FileToFile) {
-            String info[] = new String[4];
-            info[0] = f.getAbsolutePath();
-            info[1] = f.getName();
-            info[2] = "0";
-            fileInfo.add(info);
-            copyFilesLength = f.length();
+            fileList.add(f);
             return;
         }
 
         if (listFiles != null) {
             for (File file : listFiles) {
-
-                String info[] = new String[4];
-                fileInfo.add(info);
-
+                fileList.add(file);
                 if (!file.isDirectory()) {
-                    info[0] = file.getAbsolutePath();
-                    info[1] = file.getName();
-                    info[2] = "0";
+                    fileList.add(file);
                     copyFilesLength = copyFilesLength + file.length();
                 } else {
-                    info[0] = file.getAbsolutePath();
-                    info[1] = file.getName();
-                    info[2] = "1";
-                    copyFilesLength = copyFilesLength + file.length();
-                    scanDirs(file.getPath(), fileInfo);
+                    fileList.add(file);
+                    scanDirs(file.getPath());
                 }
 
             }

@@ -23,8 +23,8 @@ public class Copier implements Runnable {
 
             synchronized (in) {
                 byteCount = in.read(buffer);
-                TimeUnit.MILLISECONDS.sleep(1);
                 write(buffer, byteCount);
+                TimeUnit.MILLISECONDS.sleep(1);
             }
 
             TimeUnit.MILLISECONDS.sleep(1);
@@ -38,10 +38,8 @@ public class Copier implements Runnable {
             if (byteCount > -1) {
                 out.write(buffer, 0, byteCount);
                 writtenBytes = writtenBytes + byteCount;
-                TimeUnit.MILLISECONDS.sleep(1);
             }
         }
-        TimeUnit.MILLISECONDS.sleep(1);
 
     }
 
