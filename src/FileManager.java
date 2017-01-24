@@ -74,7 +74,6 @@ public class FileManager {
 
         Thread countDown = new Thread(fm.new CountDown());
 
-
         fm.copyFilesLength = getFilesLength(fm.fileList);
 
         countDown.start();
