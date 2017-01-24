@@ -132,7 +132,7 @@ public class FileManager {
     private static long getFilesLength(ArrayList<File> fileList) {
         long fileLength = 0;
 
-        for (File file: fileList) {
+        for (File file : fileList) {
             fileLength = fileLength + file.length();
         }
         return fileLength;
